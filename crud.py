@@ -24,3 +24,40 @@ def authenticate_user(db: Session, email: str, password: str):
     if not auth.verify_password(password, user.hashed_password):
         return None
     return user
+
+
+# ---------------- PRODUCT CRUD ---------------- #
+
+def create_product(db: Session, product_data):
+    product = models.Product(**product_data.dict())
+    db.add(product)
+    db.commit()
+    db.refresh(product)
+    return product
+
+def get_products(db: Session):
+    return db.query(models.Product).all()
+
+def get_product(db: Session, product_id: int):
+    return db.query(models.Product).filter(models.Product.id == product_id).first()
+
+def update_product(db: Session, product_id: int, product_data):
+    product = get_product(db, product_id)
+    if not product:
+        return None
+
+    for key, value in product_data.dict().items():
+        setattr(product, key, value)
+    
+    db.commit()
+    db.refresh(product)
+    return product
+
+def delete_product(db: Session, product_id: int):
+    product = get_product(db, product_id)
+    if not product:
+        return None
+
+    db.delete(product)
+    db.commit()
+    return True

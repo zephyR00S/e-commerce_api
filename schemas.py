@@ -30,14 +30,17 @@ class TokenData(BaseModel):
 # ---------- PRODUCT ----------
 class ProductBase(BaseModel):
     name: str
+    description: str
     price: float
-    stock: int
+    stock: int = 0
+    is_active: bool = True
 
 class ProductCreate(ProductBase):
     pass
 
 class Product(ProductBase):
     id: int
+
     class Config:
         orm_mode = True
 

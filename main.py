@@ -9,20 +9,21 @@ from database import engine, SessionLocal, Base
 import crud
 import schemas
 import auth
+from products import router as products_router
+from database import get_db
+
+
+
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="E-commerce API (Auth module)")
+app.include_router(products_router)
+
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-# Dependency to get DB session per request
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+
 
 # Create user (signup)
 @app.post("/signup", response_model=schemas.UserOut)
