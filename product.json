@@ -1,0 +1,162 @@
+[
+  {
+    "id": 1,
+    "name": "Wireless Headphones",
+    "description": "Noise-cancelling over-ear Bluetooth headphones",
+    "price": 149.99,
+    "stock": 25,
+    "is_active": true
+  },
+  {
+    "id": 2,
+    "name": "Smart Watch",
+    "description": "Fitness tracking smartwatch with AMOLED display",
+    "price": 89.50,
+    "stock": 40,
+    "is_active": true
+  },
+  {
+    "id": 3,
+    "name": "Laptop Stand",
+    "description": "Aluminum adjustable ergonomic laptop stand",
+    "price": 29.99,
+    "stock": 100,
+    "is_active": true
+  },
+  {
+    "id": 4,
+    "name": "Mechanical Keyboard",
+    "description": "RGB mechanical keyboard with blue switches",
+    "price": 79.99,
+    "stock": 15,
+    "is_active": true
+  },
+  {
+    "id": 5,
+    "name": "Gaming Mouse",
+    "description": "Ergonomic gaming mouse with 7 programmable buttons",
+    "price": 39.99,
+    "stock": 60,
+    "is_active": true
+  },
+  {
+    "id": 6,
+    "name": "4K Monitor",
+    "description": "27-inch UHD IPS monitor with HDR support",
+    "price": 329.00,
+    "stock": 10,
+    "is_active": true
+  },
+  {
+    "id": 7,
+    "name": "USB-C Hub",
+    "description": "7-in-1 USB-C hub with HDMI and card reader support",
+    "price": 24.99,
+    "stock": 120,
+    "is_active": true
+  },
+  {
+    "id": 8,
+    "name": "Portable SSD",
+    "description": "1TB USB 3.1 portable solid-state drive",
+    "price": 99.99,
+    "stock": 30,
+    "is_active": true
+  },
+  {
+    "id": 9,
+    "name": "Bluetooth Speaker",
+    "description": "Waterproof portable Bluetooth speaker",
+    "price": 45.00,
+    "stock": 75,
+    "is_active": true
+  },
+  {
+    "id": 10,
+    "name": "Wireless Charger",
+    "description": "Fast wireless charger pad (15W)",
+    "price": 19.99,
+    "stock": 150,
+    "is_active": true
+  },
+  {
+    "id": 11,
+    "name": "Action Camera",
+    "description": "4K action camera with waterproof case",
+    "price": 129.99,
+    "stock": 18,
+    "is_active": true
+  },
+  {
+    "id": 12,
+    "name": "Smartphone Tripod",
+    "description": "Adjustable tripod stand with Bluetooth remote",
+    "price": 16.49,
+    "stock": 90,
+    "is_active": true
+  },
+  {
+    "id": 13,
+    "name": "Noise-Cancelling Earbuds",
+    "description": "ANC Bluetooth earbuds with charging case",
+    "price": 59.99,
+    "stock": 50,
+    "is_active": true
+  },
+  {
+    "id": 14,
+    "name": "LED Desk Lamp",
+    "description": "Dimmable LED desk lamp with USB charging",
+    "price": 22.99,
+    "stock": 110,
+    "is_active": true
+  },
+  {
+    "id": 15,
+    "name": "Fitness Band",
+    "description": "Heart-rate monitoring fitness band",
+    "price": 34.99,
+    "stock": 70,
+    "is_active": true
+  },
+  {
+    "id": 16,
+    "name": "Webcam 1080p",
+    "description": "Full HD web camera with built-in microphone",
+    "price": 49.99,
+    "stock": 40,
+    "is_active": true
+  },
+  {
+    "id": 17,
+    "name": "Router",
+    "description": "Dual-band WiFi router with 1200 Mbps support",
+    "price": 64.50,
+    "stock": 28,
+    "is_active": true
+  },
+  {
+    "id": 18,
+    "name": "External Hard Drive",
+    "description": "2TB USB 3.0 external HDD",
+    "price": 59.99,
+    "stock": 35,
+    "is_active": true
+  },
+  {
+    "id": 19,
+    "name": "Gaming Chair",
+    "description": "Ergonomic gaming chair with adjustable height",
+    "price": 199.00,
+    "stock": 12,
+    "is_active": true
+  },
+  {
+    "id": 20,
+    "name": "Graphics Tablet",
+    "description": "Drawing tablet with stylus pen for artists",
+    "price": 89.99,
+    "stock": 22,
+    "is_active": true
+  }
+]

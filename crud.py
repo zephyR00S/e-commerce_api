@@ -131,26 +131,44 @@ def create_order_from_cart(db, user_id):
 
     total = 0
 
-    # create order items
+    # create order items + subtract stock
     for item in cart_items:
         product = db.query(models.Product).filter(models.Product.id == item.product_id).first()
 
+        if not product:
+            continue
+
+        # 1️⃣ Check stock availability
+        if product.stock < item.quantity:
+            raise Exception(f"Not enough stock for product: {product.name}")
+
+        # 2️⃣ Create order item
         order_item = models.OrderItem(
             order_id=order.id,
             product_id=item.product_id,
             quantity=item.quantity,
             price=product.price
         )
-
-        total += product.price * item.quantity
         db.add(order_item)
 
-    # update total
+        # 3️⃣ Reduce stock
+        print("Before:", product.stock)
+        product.stock -= item.quantity
+        print("After:", product.stock)
+
+        db.commit()
+        db.refresh(product)
+
+        # update total
+        total += product.price * item.quantity
+
+    # update order total
     order.total_amount = total
     db.commit()
 
-    # clear user's cart
+    # clear cart
     db.query(models.Cart).filter(models.Cart.user_id == user_id).delete()
     db.commit()
 
     return order
+
