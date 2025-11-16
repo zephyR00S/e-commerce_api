@@ -15,6 +15,8 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     is_active = Column(Integer, default=1)  # 1 = active, 0 = inactive
+    is_admin = Column(Boolean, default=False)
+
 
     orders = relationship("Order", back_populates="user")
     cart_items = relationship("Cart", back_populates="user")

@@ -7,6 +7,7 @@ from pydantic import BaseModel, EmailStr
 class UserCreate(BaseModel):
     email: str
     password: str
+    is_admin: bool = False
 
 # UserOut is what the API returns for user info.
 class UserOut(BaseModel):
