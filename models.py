@@ -3,7 +3,8 @@
 This defines DB tables: User, Product, CartItem, Order, OrderItem.
 
 """
-from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey
+from datetime import datetime
+from sqlalchemy import Column, DateTime, Integer, String, Float, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -17,6 +18,8 @@ class User(Base):
 
     orders = relationship("Order", back_populates="user")
     cart_items = relationship("Cart", back_populates="user")
+    orders = relationship("Order", back_populates="user")
+
 
 
 class Product(Base):
@@ -46,10 +49,14 @@ class Cart(Base):
 class Order(Base):
     __tablename__ = "orders"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
-    total_price = Column(Float)
+    total_amount = Column(Float, default=0)
+    status = Column(String, default="Pending")   # Pending, Paid, Shipped, Delivered
 
+    created_at = Column(DateTime, default=datetime.now())
+
+    # Relationship
     user = relationship("User", back_populates="orders")
     items = relationship("OrderItem", back_populates="order")
 
@@ -59,8 +66,9 @@ class OrderItem(Base):
 
     id = Column(Integer, primary_key=True)
     order_id = Column(Integer, ForeignKey("orders.id"))
-    product_name = Column(String)
-    quantity = Column(Integer)
-    price = Column(Float)
+    product_id = Column(Integer, ForeignKey("products.id"))
+    quantity = Column(Integer, default=1)
+    price = Column(Float)  # price at time of order
 
     order = relationship("Order", back_populates="items")
+    product = relationship("Product")

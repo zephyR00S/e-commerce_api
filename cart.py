@@ -17,6 +17,14 @@ def add_item_to_cart(
     db: Session = Depends(get_db),
     user=Depends(get_current_user)
 ):
+    # Check if product exists
+    product = db.query(models.Product).filter(
+        models.Product.id == item.product_id
+    ).first()
+
+    if not product:
+        raise HTTPException(404, "Product does not exist")
+
     cart_item = crud.add_to_cart(db, user.id, item.product_id, item.quantity)
     return cart_item
 
@@ -29,12 +37,29 @@ def view_cart(
 ):
     items = crud.get_cart_items(db, user.id)
 
-    total = sum(i.product.price * i.quantity for i in items)
+    fixed_items = []
+    total = 0
+
+    for item in items:
+        if not item.product:     # Skip broken/invalid entries
+            continue
+
+        subtotal = item.product.price * item.quantity
+        total += subtotal
+
+        fixed_items.append({
+            "product_id": item.product_id,
+            "name": item.product.name,
+            "price": item.product.price,
+            "quantity": item.quantity,
+            "subtotal": subtotal
+        })
 
     return {
-        "items": items,
+        "items": fixed_items,
         "total_price": total
     }
+
 
 # Update Quantity
 @router.put("/{product_id}", response_model=CartItemOut)

@@ -1,4 +1,5 @@
 # These define request/response models.
+from typing import List
 from pydantic import BaseModel, EmailStr
 
 # ---------- USER ----------
@@ -62,8 +63,21 @@ class CartItemOut(BaseModel):
 
 
 # ---------- ORDER ----------
-class Order(BaseModel):
+
+class OrderItemSchema(BaseModel):
+    product_id: int
+    quantity: int
+    price: float
+
+    class Config:
+        from_attributes = True
+
+
+class OrderSchema(BaseModel):
     id: int
-    total_price: float
+    total_amount: float
+    status: str
+    items: List[OrderItemSchema]
+
     class Config:
         from_attributes = True

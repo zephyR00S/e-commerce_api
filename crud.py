@@ -114,3 +114,43 @@ def remove_from_cart(db: Session, user_id: int, product_id: int):
     db.commit()
     return True
 
+#---------------- ORDER CRUD ---------------- #
+
+def create_order_from_cart(db, user_id):
+    # fetch user cart
+    cart_items = db.query(models.Cart).filter(models.Cart.user_id == user_id).all()
+
+    if not cart_items:
+        return None
+
+    # create order
+    order = models.Order(user_id=user_id, status="Pending")
+    db.add(order)
+    db.commit()
+    db.refresh(order)
+
+    total = 0
+
+    # create order items
+    for item in cart_items:
+        product = db.query(models.Product).filter(models.Product.id == item.product_id).first()
+
+        order_item = models.OrderItem(
+            order_id=order.id,
+            product_id=item.product_id,
+            quantity=item.quantity,
+            price=product.price
+        )
+
+        total += product.price * item.quantity
+        db.add(order_item)
+
+    # update total
+    order.total_amount = total
+    db.commit()
+
+    # clear user's cart
+    db.query(models.Cart).filter(models.Cart.user_id == user_id).delete()
+    db.commit()
+
+    return order
