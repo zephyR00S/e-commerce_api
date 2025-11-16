@@ -11,7 +11,7 @@ import schemas
 import auth
 from products import router as products_router
 from database import get_db
-
+from cart import router as cart_router
 
 
 
@@ -19,6 +19,7 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="E-commerce API (Auth module)")
 app.include_router(products_router)
+app.include_router(cart_router)
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")

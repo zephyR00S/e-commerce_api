@@ -16,7 +16,7 @@ class User(Base):
     is_active = Column(Integer, default=1)  # 1 = active, 0 = inactive
 
     orders = relationship("Order", back_populates="user")
-    cart_items = relationship("CartItem", back_populates="user")
+    cart_items = relationship("Cart", back_populates="user")
 
 
 class Product(Base):
@@ -29,17 +29,18 @@ class Product(Base):
     stock = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)
 
+class Cart(Base):
+    __tablename__ = "cart"
 
-class CartItem(Base):
-    __tablename__ = "cart_items"
-
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     product_id = Column(Integer, ForeignKey("products.id"))
-    quantity = Column(Integer)
+    quantity = Column(Integer, default=1)
 
     user = relationship("User", back_populates="cart_items")
     product = relationship("Product")
+
+
 
 
 class Order(Base):

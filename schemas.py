@@ -14,7 +14,7 @@ class UserOut(BaseModel):
     is_active: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # ---------- TOKEN ---------- 
@@ -42,20 +42,23 @@ class Product(ProductBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # ---------- CART ----------
-class CartItemCreate(BaseModel):
+class CartItemBase(BaseModel):
     product_id: int
-    quantity: int
+    quantity: int = 1
 
-class CartItem(BaseModel):
+class CartItemCreate(CartItemBase):
+    pass
+
+class CartItemOut(BaseModel):
     id: int
     product_id: int
     quantity: int
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # ---------- ORDER ----------
@@ -63,4 +66,4 @@ class Order(BaseModel):
     id: int
     total_price: float
     class Config:
-        orm_mode = True
+        from_attributes = True

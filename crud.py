@@ -61,3 +61,56 @@ def delete_product(db: Session, product_id: int):
     db.delete(product)
     db.commit()
     return True
+
+
+
+# ---------------- CART CRUD ---------------- #
+
+def get_cart_items(db: Session, user_id: int):
+    return db.query(models.Cart).filter(models.Cart.user_id == user_id).all()
+
+
+def get_cart_item(db: Session, user_id: int, product_id: int):
+    return db.query(models.Cart).filter(
+        models.Cart.user_id == user_id,
+        models.Cart.product_id == product_id
+    ).first()
+
+
+def add_to_cart(db: Session, user_id: int, product_id: int, quantity: int):
+    item = get_cart_item(db, user_id, product_id)
+
+    if item:
+        item.quantity += quantity
+    else:
+        item = models.Cart(
+            user_id=user_id,
+            product_id=product_id,
+            quantity=quantity
+        )
+        db.add(item)
+
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+def update_cart_quantity(db: Session, user_id: int, product_id: int, quantity: int):
+    item = get_cart_item(db, user_id, product_id)
+    if not item:
+        return None
+
+    item.quantity = quantity
+    db.commit()
+    return item
+
+
+def remove_from_cart(db: Session, user_id: int, product_id: int):
+    item = get_cart_item(db, user_id, product_id)
+    if not item:
+        return False
+
+    db.delete(item)
+    db.commit()
+    return True
+
