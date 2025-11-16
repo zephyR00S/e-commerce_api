@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
+import models
 from schemas import ProductCreate, Product
 import crud
 from auth import get_current_user
+import schemas
+
 
 router = APIRouter(prefix="/products", tags=["Products"])
 
@@ -16,10 +19,10 @@ def create_product_api(
 ):
     return crud.create_product(db, product)
 
-# Public - list
-@router.get("/", response_model=list[Product])
-def get_products_api(db: Session = Depends(get_db)):
-    return crud.get_products(db)
+
+#-----------------------------------------------------------------------------------
+
+
 
 # Public - single product
 @router.get("/{product_id}", response_model=Product)
@@ -28,6 +31,38 @@ def get_product_api(product_id: int, db: Session = Depends(get_db)):
     if not product:
         raise HTTPException(404, "Product not found")
     return product
+
+# Filters + Search Route
+@router.get("/", response_model=list[schemas.Product])
+def list_products(
+    skip: int = 0,
+    limit: int = 10,
+    min_price: float | None = None,
+    max_price: float | None = None,
+    search: str | None = None,
+    is_active: bool | None = None,
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.Product)
+
+    if min_price is not None:
+        query = query.filter(models.Product.price >= min_price)
+
+    if max_price is not None:
+        query = query.filter(models.Product.price <= max_price)
+
+    if search:
+        query = query.filter(models.Product.name.ilike(f"%{search}%"))
+
+    if is_active is not None:
+        query = query.filter(models.Product.is_active == is_active)
+
+    products = query.offset(skip).limit(limit).all()
+    return products
+
+#-----------------------------------------------------------------------------------
+
+
 
 # Admin-only update
 @router.put("/{product_id}", response_model=Product)
@@ -41,6 +76,30 @@ def update_product_api(
     if not product:
         raise HTTPException(404, "Product not found")
     return product
+
+# Active/Inactive Toggle Route
+@router.put("/{product_id}/toggle", response_model=schemas.Product)
+def toggle_product(product_id: int, db: Session = Depends(get_db), 
+    current_user: str = Depends(get_current_user)
+):
+    product = db.query(models.Product).filter(models.Product.id == product_id).first()
+
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    product.is_active = not product.is_active
+    db.commit()
+    db.refresh(product)
+    return product
+
+
+
+
+
+
+#------------------------------------------------------------------------------------------------
+
+
 
 # Admin-only delete
 @router.delete("/{product_id}")
