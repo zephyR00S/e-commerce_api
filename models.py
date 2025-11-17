@@ -52,23 +52,28 @@ class Order(Base):
     __tablename__ = "orders"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
     total_amount = Column(Float, default=0)
-    status = Column(String, default="Pending")   # Pending, Paid, Shipped, Delivered
+    status = Column(String, default="Pending")  # Pending, Paid, Shipped, Delivered, Cancelled, Refunded
 
-    created_at = Column(DateTime, default=datetime.now())
+    payment_id = Column(String, nullable=True)   # For future gateways, mock keeps it None
+    paid_at = Column(DateTime, nullable=True)
+    refunded_at = Column(DateTime, nullable=True)
 
-    # Relationship
+    created_at = Column(DateTime, default=datetime.now()) 
+
+    # Relationships
     user = relationship("User", back_populates="orders")
-    items = relationship("OrderItem", back_populates="order")
+    items = relationship("OrderItem", back_populates="order", cascade="all, delete")
 
 
 class OrderItem(Base):
     __tablename__ = "order_items"
 
     id = Column(Integer, primary_key=True)
-    order_id = Column(Integer, ForeignKey("orders.id"))
-    product_id = Column(Integer, ForeignKey("products.id"))
+    order_id = Column(Integer, ForeignKey("orders.id", ondelete="CASCADE"))
+    product_id = Column(Integer, ForeignKey("products.id", ondelete="SET NULL"))
+
     quantity = Column(Integer, default=1)
     price = Column(Float)  # price at time of order
 
