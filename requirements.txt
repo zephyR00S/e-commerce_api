@@ -10,3 +10,4 @@ alembic
 pytest
 pytest-asyncio
 httpx
+pydantic[email]
