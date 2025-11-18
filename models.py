@@ -21,6 +21,7 @@ class User(Base):
     orders = relationship("Order", back_populates="user")
     cart_items = relationship("Cart", back_populates="user")
     orders = relationship("Order", back_populates="user")
+    addresses = relationship("Address", back_populates="user")
 
 
 
@@ -64,6 +65,14 @@ class Order(Base):
 
     created_at = Column(DateTime, default=datetime.now()) 
 
+    shipping_name = Column(String)
+    shipping_phone = Column(String)
+    shipping_address = Column(String)
+    shipping_city = Column(String)
+    shipping_state = Column(String)
+    shipping_pincode = Column(String)
+
+
     # Relationships
     user = relationship("User", back_populates="orders")
     items = relationship("OrderItem", back_populates="order", cascade="all, delete")
@@ -88,8 +97,27 @@ class ProductImage(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     product_id = Column(Integer, ForeignKey("products.id"))
-    file_path = Column(String)  # stored file name / path
+    file_path = Column(String, nullable = True)  # stored file name / path
     alt_text = Column(String, nullable=True)
     is_primary = Column(Boolean, default=False)
 
     product = relationship("Product", back_populates="images")
+
+class Address(Base):
+    __tablename__ = "addresses"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+
+    full_name = Column(String)
+    phone = Column(String)
+    street = Column(String)
+    city = Column(String)
+    state = Column(String)
+    pincode = Column(String)
+    landmark = Column(String, nullable=True)
+    country = Column(String, default="India")
+
+    is_primary = Column(Boolean, default=False)
+
+    user = relationship("User", back_populates="addresses")

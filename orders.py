@@ -16,6 +16,7 @@ router = APIRouter(prefix="/orders", tags=["Orders"])
 # -----------------------------------------------------
 @router.post("/", response_model=OrderSchema)
 def create_order(db: Session = Depends(get_db), user=Depends(get_current_user)):
+    
     order = crud.create_order_from_cart(db, user.id)
     if not order:
         raise HTTPException(400, "Cart is empty")

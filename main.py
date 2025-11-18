@@ -14,6 +14,7 @@ from database import get_db
 from cart import router as cart_router
 from orders import router as orders_router
 from admin import router as admin_router
+from addresses import router as addresses_router
 from fastapi.staticfiles import StaticFiles
 
 
@@ -26,7 +27,7 @@ app.include_router(products_router)
 app.include_router(cart_router)
 app.include_router(orders_router)
 app.include_router(admin_router)
-
+app.include_router(addresses_router)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 

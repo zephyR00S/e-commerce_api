@@ -1,5 +1,5 @@
 # These define request/response models.
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel, EmailStr
 
 # ---------- USER ----------
@@ -33,7 +33,7 @@ class TokenData(BaseModel):
 
 class ProductImage(BaseModel):
     id: int
-    image_url: str
+    image_url: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -89,7 +89,41 @@ class OrderSchema(BaseModel):
     id: int
     total_amount: float
     status: str
+
+    # Shipping fields ⬇⬇
+    shipping_name: str
+    shipping_phone: str
+    shipping_address: str
+    shipping_city: str
+    shipping_state: str
+    shipping_pincode: str
+
+
     items: List[OrderItemSchema]
+
+    class Config:
+        from_attributes = True
+
+
+# ---------- ADDRESS ----------
+
+class AddressBase(BaseModel):
+    full_name: str | None = None
+    phone: str | None = None
+    street: str | None = None
+    city: str | None = None
+    state: str | None = None
+    pincode: str | None = None
+    landmark: str | None = None
+    country: str | None = "India"
+    is_primary: bool = False
+
+class AddressCreate(AddressBase):
+    pass
+
+class AddressOut(AddressBase):
+    id: int
+    is_primary: bool
 
     class Config:
         from_attributes = True

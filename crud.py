@@ -1,4 +1,5 @@
 # crud.py
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 import models, schemas, auth
 
@@ -116,33 +117,50 @@ def remove_from_cart(db: Session, user_id: int, product_id: int):
 
 #---------------- ORDER CRUD ---------------- #
 
-def create_order_from_cart(db, user_id):
-    # fetch user cart
+def create_order_from_cart(db: Session, user_id: int):
+    # Fetch user cart items
     cart_items = db.query(models.Cart).filter(models.Cart.user_id == user_id).all()
-
     if not cart_items:
         return None
 
-    # create order
-    order = models.Order(user_id=user_id, status="Pending")
+    # 1️⃣ Fetch primary address
+    primary_addr = (
+        db.query(models.Address)
+        .filter(models.Address.user_id == user_id, models.Address.is_primary == True)
+        .first()
+    )
+
+    if not primary_addr:
+        raise HTTPException(400, "Please set a primary address before ordering.")
+
+    # 2️⃣ Create order with shipping details
+    order = models.Order(
+        user_id=user_id,
+        status="Pending",
+        shipping_name=primary_addr.full_name,
+        shipping_phone=primary_addr.phone,
+        shipping_address=primary_addr.street,
+        shipping_city=primary_addr.city,
+        shipping_state=primary_addr.state,
+        shipping_pincode=primary_addr.pincode
+    )
     db.add(order)
     db.commit()
     db.refresh(order)
 
     total = 0
 
-    # create order items + subtract stock
+    # 3️⃣ Create order items + subtract stock
     for item in cart_items:
         product = db.query(models.Product).filter(models.Product.id == item.product_id).first()
 
         if not product:
             continue
 
-        # 1️⃣ Check stock availability
         if product.stock < item.quantity:
-            raise Exception(f"Not enough stock for product: {product.name}")
+            raise HTTPException(400, f"Not enough stock for {product.name}")
 
-        # 2️⃣ Create order item
+        # Order item
         order_item = models.OrderItem(
             order_id=order.id,
             product_id=item.product_id,
@@ -151,26 +169,22 @@ def create_order_from_cart(db, user_id):
         )
         db.add(order_item)
 
-        # 3️⃣ Reduce stock
-        print("Before:", product.stock)
+        # Subtract stock
         product.stock -= item.quantity
-        print("After:", product.stock)
-
         db.commit()
-        db.refresh(product)
 
-        # update total
         total += product.price * item.quantity
 
-    # update order total
+    # 4️⃣ Save total
     order.total_amount = total
     db.commit()
 
-    # clear cart
+    # 5️⃣ Clear cart
     db.query(models.Cart).filter(models.Cart.user_id == user_id).delete()
     db.commit()
 
     return order
+
 
 
 #-------------------- PRODUCT IMAGES ---------------- #
@@ -192,3 +206,68 @@ def add_product_image(db, product_id: int, file_path: str, alt_text: str = None,
 
 def get_product_images(db, product_id: int):
     return db.query(models.ProductImage).filter(models.ProductImage.product_id==product_id).all()
+
+
+# ---------------- ADDRESS CRUD ---------------- #
+
+def list_addresses(db, user_id: int):
+    return db.query(models.Address).filter(models.Address.user_id == user_id).all()
+
+
+def create_address(db, user_id: int, data):
+    # If new address is primary → set all others to false
+    if data.is_primary:
+        db.query(models.Address).filter(models.Address.user_id == user_id).update(
+            {"is_primary": False}
+        )
+    address = models.Address(
+        user_id=user_id,
+        full_name=data.full_name,
+        phone=data.phone,
+        street=data.street,
+        city=data.city,
+        state=data.state,
+        pincode=data.pincode,
+        landmark=data.landmark,
+        country=data.country,
+        is_primary=data.is_primary,
+    )
+
+       
+    db.add(address)
+    db.commit()
+    db.refresh(address)
+    return address
+
+
+def set_primary_address(db: Session, user_id: int, address_id: int):
+    addr = db.query(models.Address).filter(
+        models.Address.id == address_id,
+        models.Address.user_id == user_id
+    ).first()
+
+    if not addr:
+        return None
+
+    # Reset others
+    db.query(models.Address).filter(
+        models.Address.user_id == user_id
+    ).update({"is_primary": False})
+
+    addr.is_primary = True
+    db.commit()
+    return addr
+
+
+def delete_address(db, user_id: int, address_id: int):
+    address = db.query(models.Address).filter(
+        models.Address.id == address_id,
+        models.Address.user_id == user_id
+    ).first()
+
+    if not address:
+        return False
+
+    db.delete(address)
+    db.commit()
+    return True
