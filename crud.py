@@ -172,3 +172,23 @@ def create_order_from_cart(db, user_id):
 
     return order
 
+
+#-------------------- PRODUCT IMAGES ---------------- #
+
+def add_product_image(db, product_id: int, file_path: str, alt_text: str = None, is_primary=False):
+    img = models.ProductImage(
+        product_id=product_id,
+        file_path=file_path,
+        alt_text=alt_text,
+        is_primary=is_primary
+    )
+    if is_primary:
+        # unset other primaries
+        db.query(models.ProductImage).filter(models.ProductImage.product_id == product_id).update({"is_primary": False})
+    db.add(img)
+    db.commit()
+    db.refresh(img)
+    return img
+
+def get_product_images(db, product_id: int):
+    return db.query(models.ProductImage).filter(models.ProductImage.product_id==product_id).all()

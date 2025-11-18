@@ -30,20 +30,30 @@ class TokenData(BaseModel):
 
 
 # ---------- PRODUCT ----------
+
+class ProductImage(BaseModel):
+    id: int
+    image_url: str
+
+    class Config:
+        from_attributes = True
+
+
 class ProductBase(BaseModel):
     name: str
     description: str
     price: float
     stock: int = 0
     is_active: bool = True
-    image_url: str | None = None
+    
 
 class ProductCreate(ProductBase):
     pass
 
 class Product(ProductBase):
     id: int
-
+    images: list[ProductImage] = []
+    
     class Config:
         from_attributes = True
 

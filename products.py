@@ -1,4 +1,5 @@
 import os
+from uuid import uuid4
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from database import get_db
@@ -8,9 +9,9 @@ import crud
 from auth import get_current_user
 import schemas
 
-
+UPLOAD_FOLDER = "uploads/products"
 router = APIRouter(prefix="/products", tags=["Products"])
-UPLOAD_DIR = "uploads/products"
+
 
 
 # Admin-only creation
@@ -118,38 +119,43 @@ def delete_product_api(
 
 #------------------------------------------------------------------------------------------------
 
-
-@router.post("/{product_id}/upload-image")
-def upload_product_image(
+@router.post("/{product_id}/images")
+async def upload_images(
     product_id: int,
-    file: UploadFile = File(...),
+    files: list[UploadFile] = File(...),
     db: Session = Depends(get_db),
     user=Depends(get_current_user)
 ):
-    # Only admin can upload images
-    if not getattr(user, "is_admin", False):
-        raise HTTPException(403, "Only admin can upload images")
+    # Only admin can upload
+    if not user.is_admin:
+        raise HTTPException(403, "Only admin can upload product images")
 
     product = db.query(models.Product).filter(models.Product.id == product_id).first()
+
     if not product:
         raise HTTPException(404, "Product not found")
 
-    # Validate file type
-    if not file.filename.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
-        raise HTTPException(400, "Invalid file type")
+    saved_images = []
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    for file in files:
+        ext = file.filename.split(".")[-1]
+        unique_name = f"{uuid4()}.{ext}"
 
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
+        file_path = os.path.join(UPLOAD_FOLDER, unique_name)
 
-    filename = f"{product_id}_{file.filename}"
-    filepath = os.path.join(UPLOAD_DIR, filename)
+        # Save file to disk
+        with open(file_path, "wb") as buffer:
+            buffer.write(await file.read())
 
-    # Save file
-    with open(filepath, "wb") as buffer:
-        buffer.write(file.file.read())
+        # Save entry in DB
+        image = models.ProductImage(product_id=product_id, 
+                        file_path=f"/uploads/products/{unique_name}")
+        db.add(image)
+        saved_images.append(image)
 
-    # Update product image URL
-    product.image_url = f"/static/products/{filename}"
     db.commit()
-    db.refresh(product)
 
-    return {"message": "Image uploaded successfully", "url": product.image_url}
+    return {
+        "message": "Images uploaded successfully",
+        "images": [img.file_path for img in saved_images]
+    }

@@ -33,7 +33,8 @@ class Product(Base):
     price = Column(Float)
     stock = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)
-    image_url = Column(String, nullable=True) 
+
+    images = relationship("ProductImage", back_populates="product")
 
 class Cart(Base):
     __tablename__ = "cart"
@@ -80,3 +81,15 @@ class OrderItem(Base):
 
     order = relationship("Order", back_populates="items")
     product = relationship("Product")
+
+
+class ProductImage(Base):
+    __tablename__ = "product_images"
+
+    id = Column(Integer, primary_key=True, index=True)
+    product_id = Column(Integer, ForeignKey("products.id"))
+    file_path = Column(String)  # stored file name / path
+    alt_text = Column(String, nullable=True)
+    is_primary = Column(Boolean, default=False)
+
+    product = relationship("Product", back_populates="images")

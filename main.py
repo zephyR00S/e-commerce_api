@@ -30,7 +30,7 @@ app.include_router(admin_router)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-app.mount("/static/products", StaticFiles(directory="uploads/products"), name="product_images")
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # Create user (signup)
 @app.post("/signup", response_model=schemas.UserOut)
