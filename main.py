@@ -14,7 +14,7 @@ from database import get_db
 from cart import router as cart_router
 from orders import router as orders_router
 from admin import router as admin_router
-
+from fastapi.staticfiles import StaticFiles
 
 
 
@@ -30,7 +30,7 @@ app.include_router(admin_router)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-
+app.mount("/static/products", StaticFiles(directory="uploads/products"), name="product_images")
 
 # Create user (signup)
 @app.post("/signup", response_model=schemas.UserOut)

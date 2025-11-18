@@ -33,6 +33,7 @@ class Product(Base):
     price = Column(Float)
     stock = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)
+    image_url = Column(String, nullable=True) 
 
 class Cart(Base):
     __tablename__ = "cart"

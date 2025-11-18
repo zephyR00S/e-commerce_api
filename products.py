@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+import os
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from database import get_db
 import models
@@ -9,6 +10,8 @@ import schemas
 
 
 router = APIRouter(prefix="/products", tags=["Products"])
+UPLOAD_DIR = "uploads/products"
+
 
 # Admin-only creation
 @router.post("/", response_model=Product)
@@ -112,3 +115,41 @@ def delete_product_api(
     if not deleted:
         raise HTTPException(404, "Product not found")
     return {"message": "Product deleted"}
+
+#------------------------------------------------------------------------------------------------
+
+
+@router.post("/{product_id}/upload-image")
+def upload_product_image(
+    product_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user)
+):
+    # Only admin can upload images
+    if not getattr(user, "is_admin", False):
+        raise HTTPException(403, "Only admin can upload images")
+
+    product = db.query(models.Product).filter(models.Product.id == product_id).first()
+    if not product:
+        raise HTTPException(404, "Product not found")
+
+    # Validate file type
+    if not file.filename.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
+        raise HTTPException(400, "Invalid file type")
+
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+    filename = f"{product_id}_{file.filename}"
+    filepath = os.path.join(UPLOAD_DIR, filename)
+
+    # Save file
+    with open(filepath, "wb") as buffer:
+        buffer.write(file.file.read())
+
+    # Update product image URL
+    product.image_url = f"/static/products/{filename}"
+    db.commit()
+    db.refresh(product)
+
+    return {"message": "Image uploaded successfully", "url": product.image_url}

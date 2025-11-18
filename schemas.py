@@ -36,6 +36,7 @@ class ProductBase(BaseModel):
     price: float
     stock: int = 0
     is_active: bool = True
+    image_url: str | None = None
 
 class ProductCreate(ProductBase):
     pass
