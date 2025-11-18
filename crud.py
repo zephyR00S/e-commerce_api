@@ -67,8 +67,7 @@ def delete_product(db: Session, product_id: int):
 
 # ---------------- CART CRUD ---------------- #
 
-def get_cart_items(db: Session, user_id: int):
-    return db.query(models.Cart).filter(models.Cart.user_id == user_id).all()
+
 
 
 def get_cart_item(db: Session, user_id: int, product_id: int):
@@ -116,6 +115,11 @@ def remove_from_cart(db: Session, user_id: int, product_id: int):
     return True
 
 #---------------- ORDER CRUD ---------------- #
+def log_status(db, order_id, status):
+    history = models.OrderStatusHistory(order_id=order_id, status=status)
+    db.add(history)
+    db.commit()
+
 
 def create_order_from_cart(db: Session, user_id: int):
     # Fetch user cart items
@@ -144,6 +148,9 @@ def create_order_from_cart(db: Session, user_id: int):
         shipping_state=primary_addr.state,
         shipping_pincode=primary_addr.pincode
     )
+
+    log_status(db, order.id, "Pending")
+
     db.add(order)
     db.commit()
     db.refresh(order)

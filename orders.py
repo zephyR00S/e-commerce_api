@@ -51,19 +51,15 @@ def get_order(order_id: int, db: Session = Depends(get_db), user=Depends(get_cur
 #  Admin: Update order status
 # -----------------------------------------------------
 @router.put("/{order_id}/status")
-def update_order_status(
-    order_id: int,
-    status: str,
-    db: Session = Depends(get_db),
-    user=Depends(get_current_user)
-):
-    allowed = ["Pending", "Paid", "Shipped", "Delivered", "Cancelled", "Refunded"]
+def update_order_status(order_id: int, status: str, db: Session = Depends(get_db), user=Depends(get_current_user)):
 
-    if status not in allowed:
-        raise HTTPException(400, f"Invalid status. Allowed: {allowed}")
+    allowed_status = ["Pending", "Paid", "Packed", "Shipped", "Out for Delivery", "Delivered", "Cancelled", "Returned"]
+
+    if status not in allowed_status:
+        raise HTTPException(400, f"Invalid status. Allowed: {allowed_status}")
 
     if not getattr(user, "is_admin", False):
-        raise HTTPException(403, "Only admin can update order status.")
+        raise HTTPException(403, "Admins only")
 
     order = db.query(models.Order).filter(models.Order.id == order_id).first()
     if not order:
@@ -71,9 +67,35 @@ def update_order_status(
 
     order.status = status
     db.commit()
-    db.refresh(order)
 
-    return {"message": "Order status updated", "order": order}
+    # Save to history
+    crud.log_status(db, order_id, status)
+
+    db.refresh(order)
+    return {"message": "Status updated", "new_status": order.status}
+
+@router.get("/{order_id}/timeline")
+def order_timeline(order_id: int, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    order = db.query(models.Order).filter(
+        models.Order.id == order_id,
+        models.Order.user_id == user.id
+    ).first()
+
+    if not order:
+        raise HTTPException(404, "Order not found")
+
+    timeline = db.query(models.OrderStatusHistory).filter(
+        models.OrderStatusHistory.order_id == order_id
+    ).order_by(models.OrderStatusHistory.timestamp.asc()).all()
+
+    return [
+        {
+            "status": entry.status,
+            "timestamp": entry.timestamp
+        }
+        for entry in timeline
+    ]
+
 
 
 # -----------------------------------------------------
@@ -98,9 +120,10 @@ def mock_pay_order(order_id: int, db: Session = Depends(get_db), user=Depends(ge
 
     # Simulate successful payment
     order.status = "Paid"
-    order.paid_at = datetime.utcnow()
+    order.paid_at = datetime.now()
 
     db.commit()
+    crud.log_status(db, order.id, "Paid")
     db.refresh(order)
 
     return {

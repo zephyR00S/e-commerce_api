@@ -48,6 +48,15 @@ class Cart(Base):
     user = relationship("User", back_populates="cart_items")
     product = relationship("Product")
 
+class OrderStatusHistory(Base):
+    __tablename__ = "order_status_history"
+
+    id = Column(Integer, primary_key=True)
+    order_id = Column(Integer, ForeignKey("orders.id", ondelete="CASCADE"))
+    status = Column(String)
+    timestamp = Column(DateTime, default=datetime.now())
+
+    order = relationship("Order", back_populates="status_history")
 
 
 
@@ -76,7 +85,11 @@ class Order(Base):
     # Relationships
     user = relationship("User", back_populates="orders")
     items = relationship("OrderItem", back_populates="order", cascade="all, delete")
-
+    status_history = relationship(
+        "OrderStatusHistory",
+        back_populates="order",
+        cascade="all, delete"
+    )
 
 class OrderItem(Base):
     __tablename__ = "order_items"
@@ -121,3 +134,4 @@ class Address(Base):
     is_primary = Column(Boolean, default=False)
 
     user = relationship("User", back_populates="addresses")
+
