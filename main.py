@@ -20,7 +20,7 @@ from fastapi.staticfiles import StaticFiles
 
 
 
-Base.metadata.create_all(bind=engine)
+#Base.metadata.create_all(bind=engine) - comment out for testing purposes
 
 app = FastAPI(title="E-commerce API (Auth module)")
 app.include_router(products_router)

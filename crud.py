@@ -67,7 +67,8 @@ def delete_product(db: Session, product_id: int):
 
 # ---------------- CART CRUD ---------------- #
 
-
+def get_cart_items(db, user_id: int):
+    return db.query(models.Cart).filter(models.Cart.user_id == user_id).all()
 
 
 def get_cart_item(db: Session, user_id: int, product_id: int):
