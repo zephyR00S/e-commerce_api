@@ -154,7 +154,7 @@ def mock_refund(order_id: int, db: Session = Depends(get_db), user=Depends(get_c
 
     # Simulate refund
     order.status = "Refunded"
-    order.refunded_at = datetime.utcnow()
+    order.refunded_at = datetime.now()
 
     db.commit()
     db.refresh(order)

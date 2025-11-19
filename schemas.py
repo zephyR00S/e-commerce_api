@@ -15,7 +15,7 @@ class UserOut(BaseModel):
     email: EmailStr
     is_active: int
 
-    class Config:
+    class ConfigDict:
         from_attributes = True
 
 
@@ -35,7 +35,7 @@ class ProductImage(BaseModel):
     id: int
     image_url: Optional[str] = None
 
-    class Config:
+    class ConfigDict:
         from_attributes = True
 
 
@@ -54,7 +54,7 @@ class Product(ProductBase):
     id: int
     images: list[ProductImage] = []
     
-    class Config:
+    class ConfigDict:
         from_attributes = True
 
 
@@ -70,7 +70,7 @@ class CartItemOut(BaseModel):
     id: int
     product_id: int
     quantity: int
-    class Config:
+    class ConfigDict:
         from_attributes = True
 
 
@@ -81,7 +81,7 @@ class OrderItemSchema(BaseModel):
     quantity: int
     price: float
 
-    class Config:
+    class ConfigDict:
         from_attributes = True
 
 
@@ -101,7 +101,7 @@ class OrderSchema(BaseModel):
 
     items: List[OrderItemSchema]
 
-    class Config:
+    class ConfigDict:
         from_attributes = True
 
 
@@ -125,5 +125,5 @@ class AddressOut(AddressBase):
     id: int
     is_primary: bool
 
-    class Config:
+    class ConfigDict:
         from_attributes = True

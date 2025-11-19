@@ -30,7 +30,7 @@ def authenticate_user(db: Session, email: str, password: str):
 # ---------------- PRODUCT CRUD ---------------- #
 
 def create_product(db: Session, product_data):
-    product = models.Product(**product_data.dict())
+    product = models.Product(**product_data.model_dump())
     db.add(product)
     db.commit()
     db.refresh(product)
@@ -47,7 +47,7 @@ def update_product(db: Session, product_id: int, product_data):
     if not product:
         return None
 
-    for key, value in product_data.dict().items():
+    for key, value in product_data.model_dump().items():
         setattr(product, key, value)
     
     db.commit()
